@@ -5,7 +5,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-public class Application {
+public class ConnectorApplication {
 
     static final Object lock = new Object();
     private static final String TOPIC = "#";
@@ -21,40 +21,34 @@ public class Application {
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
 
-            int n = 1, max_attempts = 10;
-            for (; ; ) {
+            int maxAttempts = 10;
+            for (int i = 0; i < maxAttempts; i++) {
                 try {
-                    System.out.println("Connecting to broker (attempt " + n + " of " + max_attempts + "): " + BROKER);
+                    System.out.println("Connecting to broker (attempt " + i + " of " + maxAttempts + "): " + BROKER);
                     mqttClient.connect(connOpts);
                     System.out.println("Connected");
                     break;
                 } catch (MqttException me) {
                     System.out.println("Can not connect: " + me.getMessage());
-                } finally {
-                    n++;
-                    if (n > max_attempts) {
-                        System.out.println("Unable to connect");
-                        System.exit(-1);
+                }
+            }
+
+            if (mqttClient.isConnected()) {
+                mqttClient.setCallback(new MqttListener());
+                mqttClient.subscribe(TOPIC);
+                System.out.println("Subscribed to " + TOPIC);
+                try {
+                    synchronized (lock) {
+                        lock.wait();
+                        System.out.println("Disconnecting");
                     }
+                } catch (InterruptedException ie) {
+                    System.out.println("InterruptedException");
                 }
+            } else {
+                System.out.println("Cannot connect.");
+                System.exit(-1);
             }
-
-            mqttClient.setCallback(new MqttListener());
-            mqttClient.subscribe(TOPIC);
-            System.out.println("Subscribed to " + TOPIC);
-
-            try {
-                synchronized (lock) {
-                    lock.wait();
-                    System.out.println("Disconnecting");
-                }
-            } catch (InterruptedException ie) {
-                System.out.println("InterruptedException");
-            }
-
-
-//            System.out.println("\r\nPress Enter to exit");
-//            System.in.read();
 
         } catch (MqttException me) {
             System.out.println("reason " + me.getReasonCode());

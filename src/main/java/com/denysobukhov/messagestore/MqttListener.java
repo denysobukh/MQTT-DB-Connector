@@ -1,6 +1,6 @@
 package com.denysobukhov.messagestore;
 
-import com.denysobukhov.messagestore.dao.WeatherSensorMessage;
+import com.denysobukhov.messagestore.dao.EnvironmentMessage;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -8,14 +8,9 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-import javax.xml.parsers.DocumentBuilder;
-
 public class MqttListener implements MqttCallback {
 
     private SessionFactory sessionFactory;
-
-    private DocumentBuilder documentBuilder;
-
 
     MqttListener() throws MessageStoreException {
         /*
@@ -38,8 +33,8 @@ public class MqttListener implements MqttCallback {
 
     public void connectionLost(Throwable throwable) {
         System.out.println("Connection lost");
-        synchronized (Application.lock) {
-            Application.lock.notifyAll();
+        synchronized (ConnectorApplication.lock) {
+            ConnectorApplication.lock.notifyAll();
         }
         System.out.println("Signal sent");
     }
@@ -48,9 +43,7 @@ public class MqttListener implements MqttCallback {
         System.out.println("WeatherSensorMessage arrived: " + s + " : " + mqttMessage);
 
         try {
-            WeatherSensorMessage message = new WeatherSensorMessage(mqttMessage);
-
-            System.out.println(message);
+            EnvironmentMessage message = new EnvironmentMessage(mqttMessage);
             Session session = sessionFactory.openSession();
             session.getTransaction().begin();
             session.persist(message);

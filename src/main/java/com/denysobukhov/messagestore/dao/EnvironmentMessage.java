@@ -22,10 +22,10 @@ import java.util.StringJoiner;
 
 @Entity
 @Table(name = "weather_sensor_messages")
-public class WeatherSensorMessage implements Serializable {
+public class EnvironmentMessage implements Serializable {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-    @Id
 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private Timestamp timestamp;
@@ -38,9 +38,9 @@ public class WeatherSensorMessage implements Serializable {
      * Creates message from xml string
      *
      * @param mqttMessage
-     * @throws WeatherSensorMessageException
+     * @throws MessageException
      */
-    public WeatherSensorMessage(String mqttMessage) throws WeatherSensorMessageException {
+    public EnvironmentMessage(String mqttMessage) throws MessageException {
         try {
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = documentBuilder.parse(
@@ -52,10 +52,8 @@ public class WeatherSensorMessage implements Serializable {
             NodeList nodeList;
             nodeList = document.getElementsByTagName("message");
             if (nodeList.getLength() > 0) {
-                timestamp = new Timestamp(
-                        SIMPLE_DATE_FORMAT.parse(
-                                ((Element) nodeList.item(0)).getAttribute("time")
-                        ).getTime());
+                final String timeStr = ((Element) nodeList.item(0)).getAttribute("time");
+                timestamp = new Timestamp(SIMPLE_DATE_FORMAT.parse(timeStr).getTime());
             }
 
             nodeList = document.getElementsByTagName("temperature");
@@ -90,12 +88,12 @@ public class WeatherSensorMessage implements Serializable {
                 }
             }
         } catch (ParserConfigurationException | SAXException | IOException | ParseException e) {
-            throw new WeatherSensorMessageException("cannot init builder", e);
+            throw new MessageException("cannot init builder", e);
         }
     }
 
 
-    public WeatherSensorMessage(Timestamp timestamp, BigDecimal temperature, BigDecimal humidity, BigDecimal pressure, BigDecimal voltage) {
+    public EnvironmentMessage(Timestamp timestamp, BigDecimal temperature, BigDecimal humidity, BigDecimal pressure, BigDecimal voltage) {
         this.timestamp = timestamp;
         this.temperature = temperature;
         this.humidity = humidity;
@@ -103,11 +101,11 @@ public class WeatherSensorMessage implements Serializable {
         this.voltage = voltage;
     }
 
-    public WeatherSensorMessage(MqttMessage mqttMessage) throws WeatherSensorMessageException {
+    public EnvironmentMessage(MqttMessage mqttMessage) throws MessageException {
         this(mqttMessage.toString());
     }
 
-    public WeatherSensorMessage() {
+    public EnvironmentMessage() {
     }
 
 
@@ -161,7 +159,7 @@ public class WeatherSensorMessage implements Serializable {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", WeatherSensorMessage.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", EnvironmentMessage.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
                 .add("timestamp=" + timestamp)
                 .add("temperature=" + temperature)
@@ -171,8 +169,8 @@ public class WeatherSensorMessage implements Serializable {
                 .toString();
     }
 
-    public class WeatherSensorMessageException extends Exception {
-        public WeatherSensorMessageException(String message, Throwable cause) {
+    public class MessageException extends Exception {
+        public MessageException(String message, Throwable cause) {
             super(message, cause);
         }
     }
