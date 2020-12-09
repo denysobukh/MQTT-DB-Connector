@@ -17,6 +17,19 @@
     </repositories>
 
     <dependencies>
+        <!-- API, java.xml.bind module -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
+        <!-- Runtime, com.sun.xml.bind module -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.2</version>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
@@ -59,7 +72,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.denysobukhov.messagestore.Application</mainClass>
+                            <mainClass>com.denysobukhov.messagestore.ConnectorApplication</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -78,7 +91,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.denysobukhov.messagestore.Application</mainClass>
+                            <mainClass>com.denysobukhov.messagestore.ConnectorApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
