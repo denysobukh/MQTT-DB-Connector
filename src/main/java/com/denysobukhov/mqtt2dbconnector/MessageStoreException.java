@@ -1,4 +1,4 @@
-package com.denysobukhov.messagestore;
+package com.denysobukhov.mqtt2dbconnector;
 
 public class MessageStoreException extends Exception {
     public MessageStoreException() {

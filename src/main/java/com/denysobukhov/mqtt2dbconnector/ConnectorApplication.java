@@ -1,4 +1,4 @@
-package com.denysobukhov.messagestore;
+package com.denysobukhov.mqtt2dbconnector;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;

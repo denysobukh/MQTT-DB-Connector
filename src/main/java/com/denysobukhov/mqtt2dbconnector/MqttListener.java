@@ -1,6 +1,6 @@
-package com.denysobukhov.messagestore;
+package com.denysobukhov.mqtt2dbconnector;
 
-import com.denysobukhov.messagestore.dao.EnvironmentMessage;
+import com.denysobukhov.mqtt2dbconnector.dao.EnvironmentMessage;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;

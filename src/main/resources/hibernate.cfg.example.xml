@@ -14,6 +14,6 @@
         <property name="hibernate.connection.verifyServerCertificate">false</property>
         <property name="hibernate.connection.username">iotcoreuser</property>
         <property name="hibernate.connection.password">password</property>
-        <mapping class="com.denysobukhov.messagestore.dao.EnvironmentMessage"/>
+        <mapping class="com.denysobukhov.mqtt2dbconnector.dao.EnvironmentMessage"/>
     </session-factory>
 </hibernate-configuration>

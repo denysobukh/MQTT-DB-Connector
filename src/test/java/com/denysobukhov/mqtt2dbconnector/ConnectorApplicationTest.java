@@ -1,7 +1,7 @@
-package com.denysobukhov.messagestore;
+package com.denysobukhov.mqtt2dbconnector;
 
 
-import com.denysobukhov.messagestore.dao.EnvironmentMessage;
+import com.denysobukhov.mqtt2dbconnector.dao.EnvironmentMessage;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
