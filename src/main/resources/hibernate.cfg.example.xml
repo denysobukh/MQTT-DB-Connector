@@ -8,13 +8,12 @@
         <property name="hibernate.show_sql">false</property>
         <property name="hibernate.format_sql">true</property>
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
-        <property name="hibernate.connection.url">jdbc:postgresql://nas.loc:5433/station</property>
-        <property name="hibernate.connection.requireSSL">true</property>
-        <property name="hibernate.connection.ssl">true</property>
-        <property name="hibernate.connection.verifyServerCertificate">false</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://nas.loc:5432/iotcore</property>
+        <!--        <property name="hibernate.connection.requireSSL">false</property>-->
+        <!--        <property name="hibernate.connection.ssl">false</property>-->
+        <!--        <property name="hibernate.connection.verifyServerCertificate">false</property>-->
         <property name="hibernate.connection.username">station</property>
         <property name="hibernate.connection.password">password</property>
-
-        <mapping class="com.denysobukhov.messagestore.DAO.WeatherSensorMessage"/>
+        <mapping class="com.denysobukhov.messagestore.dao.WeatherSensorMessage"/>
     </session-factory>
 </hibernate-configuration>

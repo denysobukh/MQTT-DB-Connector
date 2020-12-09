@@ -8,23 +8,23 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 public class Application {
 
     static final Object lock = new Object();
+    private static final String TOPIC = "#";
+    private static final String BROKER = "tcp://nas.loc:1883";
+    private static final String CLIENT_ID = "MessageStore";
 
     public static void main(String[] args) throws MqttException {
 
-        String topicFilter = "#";
-        String broker = "tcp://nas.loc:1883";
-        String clientId = "MessageStore";
         MemoryPersistence persistence = new MemoryPersistence();
         MqttClient mqttClient = null;
         try {
-            mqttClient = new MqttClient(broker, clientId, persistence);
+            mqttClient = new MqttClient(BROKER, CLIENT_ID, persistence);
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
 
             int n = 1, max_attempts = 10;
             for (; ; ) {
                 try {
-                    System.out.println("Connecting to broker (attempt " + n + " of " + max_attempts + "): " + broker);
+                    System.out.println("Connecting to broker (attempt " + n + " of " + max_attempts + "): " + BROKER);
                     mqttClient.connect(connOpts);
                     System.out.println("Connected");
                     break;
@@ -40,8 +40,8 @@ public class Application {
             }
 
             mqttClient.setCallback(new MqttListener());
-            mqttClient.subscribe(topicFilter);
-            System.out.println("Subscribed");
+            mqttClient.subscribe(TOPIC);
+            System.out.println("Subscribed to " + TOPIC);
 
             try {
                 synchronized (lock) {
