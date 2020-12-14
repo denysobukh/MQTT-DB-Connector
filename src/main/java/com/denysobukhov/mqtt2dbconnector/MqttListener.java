@@ -1,12 +1,18 @@
 package com.denysobukhov.mqtt2dbconnector;
 
 import com.denysobukhov.mqtt2dbconnector.dao.EnvironmentMessage;
+import com.denysobukhov.mqtt2dbconnector.dao.ParameterName;
+import com.denysobukhov.mqtt2dbconnector.dao.ParameterValue;
+import com.denysobukhov.mqtt2dbconnector.dao.SensorMessage;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
+
+import java.util.Set;
 
 public class MqttListener implements MqttCallback {
 
@@ -48,8 +54,31 @@ public class MqttListener implements MqttCallback {
             session.getTransaction().begin();
             session.persist(message);
             session.getTransaction().commit();
-            session.close();
 
+            SensorMessageBuilder messageBuilder = new SensorMessageBuilderMqttXmlV1();
+            final Set<SensorMessage> sensorMessages = messageBuilder.parse(mqttMessage.toString());
+
+
+            session.getTransaction().begin();
+            for (SensorMessage m : sensorMessages) {
+                for (ParameterValue p : m.getParameterValues()) {
+                    final ParameterName parameterName = p.getParameterName();
+
+                    Query<ParameterName> query = session.createQuery(
+                            "from ParameterName n where n.name=:name", ParameterName.class);
+                    query.setParameter("name", parameterName.getName());
+                    ParameterName nameResult = query.uniqueResult();
+                    if (nameResult != null) {
+                        p.setParameterName(nameResult);
+                    } else {
+                        session.saveOrUpdate(parameterName);
+                    }
+                }
+                session.persist(m);
+            }
+            session.getTransaction().commit();
+
+            session.close();
         } catch (Throwable e) {
             e.printStackTrace();
         }
