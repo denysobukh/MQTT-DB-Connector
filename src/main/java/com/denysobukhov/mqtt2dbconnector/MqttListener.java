@@ -1,6 +1,5 @@
 package com.denysobukhov.mqtt2dbconnector;
 
-import com.denysobukhov.mqtt2dbconnector.dao.EnvironmentMessage;
 import com.denysobukhov.mqtt2dbconnector.dao.ParameterName;
 import com.denysobukhov.mqtt2dbconnector.dao.ParameterValue;
 import com.denysobukhov.mqtt2dbconnector.dao.SensorMessage;
@@ -49,10 +48,8 @@ public class MqttListener implements MqttCallback {
         System.out.println("WeatherSensorMessage arrived: " + s + " : " + mqttMessage);
 
         try {
-            EnvironmentMessage message = new EnvironmentMessage(mqttMessage);
             Session session = sessionFactory.openSession();
             session.getTransaction().begin();
-            session.persist(message);
             session.getTransaction().commit();
 
             SensorMessageBuilder messageBuilder = new SensorMessageBuilderMqttXmlV1();

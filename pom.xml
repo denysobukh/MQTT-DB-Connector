@@ -35,10 +35,11 @@
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
             <version>[1.2.1,)</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
         <dependency>
-            <groupId>postgresql</groupId>
+            <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.1-901-1.jdbc4</version>
+            <version>42.2.18</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>

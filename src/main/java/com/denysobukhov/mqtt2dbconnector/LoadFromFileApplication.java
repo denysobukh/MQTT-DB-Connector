@@ -1,9 +1,12 @@
 package com.denysobukhov.mqtt2dbconnector;
 
-import com.denysobukhov.mqtt2dbconnector.dao.EnvironmentMessage;
+import com.denysobukhov.mqtt2dbconnector.dao.ParameterName;
+import com.denysobukhov.mqtt2dbconnector.dao.ParameterValue;
+import com.denysobukhov.mqtt2dbconnector.dao.SensorMessage;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -14,32 +17,38 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 /**
  * @author Denis Obukhov  / created on 09 Dec 2020
  */
 public class LoadFromFileApplication {
 
+    private SensorMessageBuilder messageBuilder = new SensorMessageBuilderMqttXmlV1();
+
     public static void main(String[] args) throws FileNotFoundException {
         if (args.length == 0) throw new IllegalArgumentException("no file parameter given");
         final String fileName = args[0];
 
         final LoadFromFileApplication loadFromFileApplication = new LoadFromFileApplication();
-        HashMap<Timestamp, EnvironmentMessage> fileMessages = loadFromFileApplication.getMessages(fileName);
+        HashMap<Timestamp, SensorMessage> fileMessages = loadFromFileApplication.getMessages(fileName);
         System.out.printf("found %d messages%n", fileMessages.size());
         System.out.printf("inserted %d records%n", loadFromFileApplication.insertIfNotExist(fileMessages));
     }
 
-    private HashMap<Timestamp, EnvironmentMessage> getMessages(String fileName) throws FileNotFoundException {
+    private HashMap<Timestamp, SensorMessage> getMessages(String fileName) throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(fileName));
-        HashMap<Timestamp, EnvironmentMessage> fileMessages = new HashMap<>();
+        HashMap<Timestamp, SensorMessage> fileMessages = new HashMap<>();
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
             if (!line.isEmpty()) {
                 try {
-                    EnvironmentMessage message = new EnvironmentMessage(line);
-                    fileMessages.putIfAbsent(message.getTimestamp(), message);
-                } catch (EnvironmentMessage.MessageException e) {
+                    Set<SensorMessage> messages = messageBuilder.parse(line);
+                    if (!messages.isEmpty()) {
+                        final SensorMessage m = messages.iterator().next();
+                        fileMessages.putIfAbsent(m.getTimestamp(), m);
+                    }
+                } catch (SensorMessageBuilder.BuilderException e) {
                     e.printStackTrace();
                 }
             }
@@ -47,22 +56,54 @@ public class LoadFromFileApplication {
         return fileMessages;
     }
 
-    private int insertIfNotExist(HashMap<Timestamp, EnvironmentMessage> messages) {
-        final SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+    private int insertIfNotExist(HashMap<Timestamp, SensorMessage> messages) {
+
+        HashMap<String, ParameterName> nameIdsCache = new HashMap<>();
+
+        final Configuration configuration = new Configuration();
+        configuration.configure();
+        configuration.setProperty("hibernate.show_sql", "false");
+        configuration.setProperty("hibernate.format_sql", "false");
+        configuration.setProperty("org.hibernate.SQL", "INFO");
+        final SessionFactory sessionFactory = configuration.buildSessionFactory();
         Session session = sessionFactory.openSession();
         // Create CriteriaBuilder
         CriteriaBuilder builder = session.getCriteriaBuilder();
         int insertCounter = 0;
-        for (EnvironmentMessage message : messages.values()) {
+        for (SensorMessage m : messages.values()) {
             // Create CriteriaQuery
-            CriteriaQuery<EnvironmentMessage> criteria = builder.createQuery(EnvironmentMessage.class);
-            final Root<EnvironmentMessage> root = criteria.from(EnvironmentMessage.class);
+            CriteriaQuery<SensorMessage> criteria = builder.createQuery(SensorMessage.class);
+            final Root<SensorMessage> root = criteria.from(SensorMessage.class);
             criteria.select(root);
-            criteria.where(builder.equal(root.get("timestamp"), message.getTimestamp()));
-            List<EnvironmentMessage> existMessage = session.createQuery(criteria).getResultList();
+            criteria.where(builder.equal(root.get("timestamp"), m.getTimestamp()));
+            List<SensorMessage> existMessage = session.createQuery(criteria).getResultList();
             if (existMessage.size() < 1) {
+
                 session.beginTransaction();
-                session.saveOrUpdate(message);
+
+                for (ParameterValue p : m.getParameterValues()) {
+                    final ParameterName parameterName = p.getParameterName();
+
+                    ParameterName nameId = nameIdsCache.get(p.getParameterName().getName());
+
+                    if (nameId == null) {
+                        Query<ParameterName> query = session.createQuery(
+                                "from ParameterName n where n.name=:name", ParameterName.class);
+                        query.setParameter("name", parameterName.getName());
+                        nameId = query.uniqueResult();
+                        if (nameId != null) {
+                            nameIdsCache.put(nameId.getName(), nameId);
+                        }
+                    }
+
+                    if (nameId == null) {
+                        session.saveOrUpdate(parameterName);
+                    } else {
+                        p.setParameterName(nameId);
+                    }
+                }
+                session.persist(m);
+
                 session.getTransaction().commit();
                 insertCounter++;
             }

@@ -1,7 +1,11 @@
 package com.denysobukhov.mqtt2dbconnector;
 
-import com.denysobukhov.mqtt2dbconnector.dao.SensorMessage;
 import com.denysobukhov.mqtt2dbconnector.dao.ParameterValue;
+import com.denysobukhov.mqtt2dbconnector.dao.SensorMessage;
+import com.denysobukhov.mqtt2dbconnector.validators.HumidityValidator;
+import com.denysobukhov.mqtt2dbconnector.validators.PressureValidator;
+import com.denysobukhov.mqtt2dbconnector.validators.TemperatureValidator;
+import com.denysobukhov.mqtt2dbconnector.validators.VoltageValidator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -45,10 +49,21 @@ public class SensorMessageBuilderMqttXmlV1 implements SensorMessageBuilder {
 
                 List<ParameterValue> parameters = new LinkedList<>();
                 message.setParameterValues(parameters);
-                Optional.ofNullable(getSensorParameter(document, "temperature")).ifPresent(message::addParameterValue);
-                Optional.ofNullable(getSensorParameter(document, "humidity")).ifPresent(message::addParameterValue);
-                Optional.ofNullable(getSensorParameter(document, "pressure")).ifPresent(message::addParameterValue);
-                Optional.ofNullable(getSensorParameter(document, "voltage")).ifPresent(message::addParameterValue);
+                Optional.ofNullable(getSensorParameter(document, "temperature"))
+                        .filter(v -> new TemperatureValidator().isValid(v.getValue()))
+                        .ifPresent(message::addParameterValue);
+
+                Optional.ofNullable(getSensorParameter(document, "humidity"))
+                        .filter(v -> new HumidityValidator().isValid(v.getValue()))
+                        .ifPresent(message::addParameterValue);
+
+                Optional.ofNullable(getSensorParameter(document, "pressure"))
+                        .filter(v -> new PressureValidator().isValid(v.getValue()))
+                        .ifPresent(message::addParameterValue);
+
+                Optional.ofNullable(getSensorParameter(document, "voltage"))
+                        .filter(v -> new VoltageValidator().isValid(v.getValue()))
+                        .ifPresent(message::addParameterValue);
 
                 final String rssiStr = ((Element) nodeList.item(0)).getAttribute("rssi");
 
@@ -70,6 +85,7 @@ public class SensorMessageBuilderMqttXmlV1 implements SensorMessageBuilder {
         }
         return messages;
     }
+
 
     private ParameterValue getSensorParameter(Document document, String name) {
         if (document == null) throw new IllegalArgumentException();
