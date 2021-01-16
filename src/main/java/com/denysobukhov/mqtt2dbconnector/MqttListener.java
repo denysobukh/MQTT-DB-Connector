@@ -38,10 +38,10 @@ public class MqttListener implements MqttCallback {
 
     public void connectionLost(Throwable throwable) {
         System.out.println("Connection lost");
+        sessionFactory.close();
         synchronized (ConnectorApplication.lock) {
             ConnectorApplication.lock.notifyAll();
         }
-        System.out.println("Signal sent");
     }
 
     public void messageArrived(String s, MqttMessage mqttMessage) {
