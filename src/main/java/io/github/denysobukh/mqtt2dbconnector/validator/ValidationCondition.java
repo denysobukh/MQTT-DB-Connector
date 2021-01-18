@@ -1,7 +1,6 @@
-package com.denysobukhov.mqtt2dbconnector.validators;
+package io.github.denysobukh.mqtt2dbconnector.validator;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 /**
  * @author Denis Obukhov  / created on 21 Dec 2020

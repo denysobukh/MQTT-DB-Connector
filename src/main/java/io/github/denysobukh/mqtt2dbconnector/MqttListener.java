@@ -1,54 +1,47 @@
-package com.denysobukhov.mqtt2dbconnector;
+package io.github.denysobukh.mqtt2dbconnector;
 
-import com.denysobukhov.mqtt2dbconnector.dao.ParameterName;
-import com.denysobukhov.mqtt2dbconnector.dao.ParameterValue;
-import com.denysobukhov.mqtt2dbconnector.dao.SensorMessage;
+import io.github.denysobukh.mqtt2dbconnector.model.ParameterName;
+import io.github.denysobukh.mqtt2dbconnector.model.ParameterValue;
+import io.github.denysobukh.mqtt2dbconnector.model.SensorMessage;
+import io.github.denysobukh.mqtt2dbconnector.service.ConnectorService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
+import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 import java.util.Set;
 
+@AllArgsConstructor
+@Slf4j
+@Component
 public class MqttListener implements MqttCallback {
 
-    private SessionFactory sessionFactory;
+    @PersistenceUnit
+    private EntityManagerFactory emf;
 
-    MqttListener() throws MessageStoreException {
-        /*
-        final StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
-                .configure() // configures settings from hibernate.cfg.example.xml
-                .build();
-        try {
-            sessionFactory = new MetadataSources(registry).buildMetadata().buildSessionFactory();
-//            entityManager = sessionFactory.createEntityManager();
-        } catch (Exception e) {
-            StandardServiceRegistryBuilder.destroy(registry);
-            throw new MessageStoreException(e);
-        }
-
-        */
-
-        sessionFactory = new Configuration().configure().buildSessionFactory();
-
+    protected SessionFactory getSessionFactory() {
+        return emf.unwrap(SessionFactory.class);
     }
 
-    public void connectionLost(Throwable throwable) {
-        System.out.println("Connection lost");
-        sessionFactory.close();
-        synchronized (ConnectorApplication.lock) {
-            ConnectorApplication.lock.notifyAll();
+    public void connectionLost(Throwable t) {
+        log.error("Connection lost", t);
+        synchronized (ConnectorService.lock) {
+            ConnectorService.lock.notifyAll();
         }
     }
 
     public void messageArrived(String s, MqttMessage mqttMessage) {
-        System.out.println("WeatherSensorMessage arrived: " + s + " : " + mqttMessage);
+        log.info("WeatherSensorMessage arrived: " + s + " : " + mqttMessage);
 
         try {
-            Session session = sessionFactory.openSession();
+            Session session = getSessionFactory().openSession();
             session.getTransaction().begin();
             session.getTransaction().commit();
 
@@ -63,6 +56,7 @@ public class MqttListener implements MqttCallback {
 
                     Query<ParameterName> query = session.createQuery(
                             "from ParameterName n where n.name=:name", ParameterName.class);
+
                     query.setParameter("name", parameterName.getName());
                     ParameterName nameResult = query.uniqueResult();
                     if (nameResult != null) {
@@ -75,14 +69,13 @@ public class MqttListener implements MqttCallback {
             }
             session.getTransaction().commit();
 
-            session.close();
         } catch (Throwable e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
     }
 
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-        System.out.println("Delivery complete");
+        log.info("Delivery complete");
     }
 }

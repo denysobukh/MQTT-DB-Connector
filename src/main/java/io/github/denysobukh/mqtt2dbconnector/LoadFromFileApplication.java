@@ -1,8 +1,8 @@
-package com.denysobukhov.mqtt2dbconnector;
+package io.github.denysobukh.mqtt2dbconnector;
 
-import com.denysobukhov.mqtt2dbconnector.dao.ParameterName;
-import com.denysobukhov.mqtt2dbconnector.dao.ParameterValue;
-import com.denysobukhov.mqtt2dbconnector.dao.SensorMessage;
+import io.github.denysobukh.mqtt2dbconnector.model.ParameterName;
+import io.github.denysobukh.mqtt2dbconnector.model.ParameterValue;
+import io.github.denysobukh.mqtt2dbconnector.model.SensorMessage;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;

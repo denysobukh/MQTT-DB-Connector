@@ -1,4 +1,4 @@
-package com.denysobukhov.mqtt2dbconnector.dao;
+package io.github.denysobukh.mqtt2dbconnector.model;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -7,7 +7,7 @@ import java.math.BigDecimal;
  * @author Denis Obukhov  / created on 13 Dec 2020
  */
 @Entity
-@Table(name = "values")
+@Table(name = "parameter_value")
 public class ParameterValue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

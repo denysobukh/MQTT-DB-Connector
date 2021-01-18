@@ -1,4 +1,4 @@
-package com.denysobukhov.mqtt2dbconnector.validators;
+package io.github.denysobukh.mqtt2dbconnector.validator;
 
 import java.math.BigDecimal;
 

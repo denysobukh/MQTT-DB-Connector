@@ -1,4 +1,4 @@
-package com.denysobukhov.mqtt2dbconnector.dao;
+package io.github.denysobukh.mqtt2dbconnector.model;
 
 import javax.persistence.*;
 import java.sql.Timestamp;

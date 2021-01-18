@@ -1,4 +1,4 @@
-package com.denysobukhov.mqtt2dbconnector.dao;
+package io.github.denysobukh.mqtt2dbconnector.model;
 
 import javax.persistence.*;
 
@@ -6,7 +6,7 @@ import javax.persistence.*;
  * @author Denis Obukhov  / created on 13 Dec 2020
  */
 @Entity
-@Table(name = "names")
+@Table(name = "parameter_name")
 public class ParameterName {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

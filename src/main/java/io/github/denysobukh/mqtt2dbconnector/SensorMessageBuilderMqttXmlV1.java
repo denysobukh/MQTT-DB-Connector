@@ -1,11 +1,11 @@
-package com.denysobukhov.mqtt2dbconnector;
+package io.github.denysobukh.mqtt2dbconnector;
 
-import com.denysobukhov.mqtt2dbconnector.dao.ParameterValue;
-import com.denysobukhov.mqtt2dbconnector.dao.SensorMessage;
-import com.denysobukhov.mqtt2dbconnector.validators.HumidityValidator;
-import com.denysobukhov.mqtt2dbconnector.validators.PressureValidator;
-import com.denysobukhov.mqtt2dbconnector.validators.TemperatureValidator;
-import com.denysobukhov.mqtt2dbconnector.validators.VoltageValidator;
+import io.github.denysobukh.mqtt2dbconnector.model.ParameterValue;
+import io.github.denysobukh.mqtt2dbconnector.model.SensorMessage;
+import io.github.denysobukh.mqtt2dbconnector.validator.HumidityValidator;
+import io.github.denysobukh.mqtt2dbconnector.validator.PressureValidator;
+import io.github.denysobukh.mqtt2dbconnector.validator.TemperatureValidator;
+import io.github.denysobukh.mqtt2dbconnector.validator.VoltageValidator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

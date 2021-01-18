@@ -1,6 +1,6 @@
-package com.denysobukhov.mqtt2dbconnector;
+package io.github.denysobukh.mqtt2dbconnector;
 
-import com.denysobukhov.mqtt2dbconnector.dao.SensorMessage;
+import io.github.denysobukh.mqtt2dbconnector.model.SensorMessage;
 
 import java.util.Set;
 
