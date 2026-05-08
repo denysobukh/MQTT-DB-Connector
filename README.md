@@ -2,7 +2,7 @@
 
 [![Java](https://img.shields.io/badge/Java-11-blue.svg)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.4.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![License](https://img.shields.io/badge/license-not%20specified-lightgrey.svg)](#license)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 MQTT-DB-Connector is a Spring Boot service that subscribes to an MQTT topic,
 parses weather sensor XML payloads, validates sensor readings, and persists the
@@ -147,5 +147,4 @@ local database cleanup and station setup.
 
 ## License
 
-No license file is currently included. Add a `LICENSE` file before publishing if
-you want to define how others may use this project.
+This project is licensed under the [MIT License](LICENSE).
