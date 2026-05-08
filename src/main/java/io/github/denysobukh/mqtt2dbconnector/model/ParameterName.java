@@ -1,8 +1,13 @@
 package io.github.denysobukh.mqtt2dbconnector.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 /**
+ * Dictionary entity for unique sensor parameter names.
+ * <p>
+ * Reusing names keeps parameter values normalized while allowing new parameter
+ * types to be added without changing the schema.
+ *
  * @author Denis Obukhov  / created on 13 Dec 2020
  */
 @Entity

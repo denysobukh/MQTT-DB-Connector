@@ -1,11 +1,16 @@
 package io.github.denysobukh.mqtt2dbconnector.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Database entity representing one message received from a sensor node.
+ * <p>
+ * A message stores routing metadata and owns a collection of measured parameter
+ * values such as temperature, humidity, pressure, and voltage.
+ *
  * @author Denis Obukhov  / created on 13 Dec 2020
  */
 @Entity
@@ -78,11 +83,21 @@ public class SensorMessage {
     }
 
 
+    /**
+     * Adds a parameter value and updates the reverse entity relationship.
+     *
+     * @param value parameter value to attach to this message
+     */
     public void addParameterValue(ParameterValue value) {
         parameterValues.add(value);
         value.setSensorMessage(this);
     }
 
+    /**
+     * Removes a parameter value and clears the reverse entity relationship.
+     *
+     * @param value parameter value to detach from this message
+     */
     public void removeParameterValue(ParameterValue value) {
         parameterValues.remove(value);
         value.setSensorMessage(null);

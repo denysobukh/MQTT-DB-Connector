@@ -3,6 +3,7 @@ package io.github.denysobukh.mqtt2dbconnector.service;
 import io.github.denysobukh.mqtt2dbconnector.MqttListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -15,12 +16,24 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Connects to the configured MQTT broker when the Spring application is ready
+ * and subscribes the application listener to the configured topic.
+ * <p>
+ * The service retries failed connections with exponential backoff and uses a
+ * persistent MQTT session so queued QoS messages can survive reconnects.
+ */
 @Slf4j
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "mqtt.enabled", havingValue = "true", matchIfMissing = true)
 @PropertySource("classpath:application.properties")
 @Service
 public class ConnectorService implements ApplicationListener<ApplicationReadyEvent> {
 
+    /**
+     * Monitor used to block the connector thread while the MQTT subscription is
+     * active and wake it after a connection loss.
+     */
     public static final Object lock = new Object();
 
     @Value("${mqtt.broker}")
@@ -32,6 +45,12 @@ public class ConnectorService implements ApplicationListener<ApplicationReadyEve
 
     private final MqttListener mqttListener;
 
+    /**
+     * Opens the MQTT connection, subscribes to the configured topic, and keeps
+     * retrying when the broker cannot be reached.
+     *
+     * @param event Spring Boot readiness event
+     */
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
 

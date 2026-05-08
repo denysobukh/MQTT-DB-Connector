@@ -1,9 +1,14 @@
 package io.github.denysobukh.mqtt2dbconnector.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 /**
+ * Database entity representing one numeric value measured in a sensor message.
+ * <p>
+ * The entity links a numeric value to its parameter name and owning
+ * {@link SensorMessage}.
+ *
  * @author Denis Obukhov  / created on 13 Dec 2020
  */
 @Entity
@@ -19,6 +24,7 @@ public class ParameterValue {
     @OneToOne(cascade = CascadeType.ALL)
     private ParameterName parameterName;
 
+    @Column(name = "parameter_value")
     private BigDecimal value;
 
     public ParameterValue() {

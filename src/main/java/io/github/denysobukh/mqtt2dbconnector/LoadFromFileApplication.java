@@ -8,9 +8,9 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Timestamp;
@@ -20,12 +20,26 @@ import java.util.Scanner;
 import java.util.Set;
 
 /**
+ * Imports previously captured MQTT XML payloads from a text file into the
+ * configured Hibernate database.
+ * <p>
+ * Each non-empty line is parsed as one MQTT XML message. Messages are
+ * de-duplicated by timestamp before insertion.
+ *
  * @author Denis Obukhov  / created on 09 Dec 2020
  */
 public class LoadFromFileApplication {
 
     private SensorMessageBuilder messageBuilder = new SensorMessageBuilderMqttXmlV1();
 
+    /**
+     * Reads MQTT payloads from the file passed as the first argument and inserts
+     * messages that are not already present in the database.
+     *
+     * @param args command-line arguments; the first argument must be a path to
+     *             the input file
+     * @throws FileNotFoundException when the input file does not exist
+     */
     public static void main(String[] args) throws FileNotFoundException {
         if (args.length == 0) throw new IllegalArgumentException("no file parameter given");
         final String fileName = args[0];
@@ -97,7 +111,7 @@ public class LoadFromFileApplication {
                     }
 
                     if (nameId == null) {
-                        session.saveOrUpdate(parameterName);
+                        session.persist(parameterName);
                     } else {
                         p.setParameterName(nameId);
                     }

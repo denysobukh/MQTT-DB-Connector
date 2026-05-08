@@ -14,10 +14,14 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceUnit;
 import java.util.Set;
 
+/**
+ * Receives MQTT messages from Eclipse Paho, parses them, and persists accepted
+ * sensor measurements to the database.
+ */
 @AllArgsConstructor
 @Slf4j
 @Component
@@ -30,6 +34,12 @@ public class MqttListener implements MqttCallback {
         return emf.unwrap(SessionFactory.class);
     }
 
+    /**
+     * Logs MQTT connection loss and wakes the connector service so it can start
+     * a reconnect cycle.
+     *
+     * @param t cause reported by the MQTT client
+     */
     public void connectionLost(Throwable t) {
         log.error("Connection lost", t);
         synchronized (ConnectorService.lock) {
@@ -37,6 +47,14 @@ public class MqttListener implements MqttCallback {
         }
     }
 
+    /**
+     * Parses one MQTT payload and stores the resulting sensor messages.
+     * Existing parameter names are reused to satisfy the unique constraint on
+     * {@code parameter_name.name}.
+     *
+     * @param s topic that delivered the message
+     * @param mqttMessage raw MQTT message payload and metadata
+     */
     public void messageArrived(String s, MqttMessage mqttMessage) {
         log.info("WeatherSensorMessage arrived: " + s + " : " + mqttMessage);
 
@@ -62,7 +80,7 @@ public class MqttListener implements MqttCallback {
                     if (nameResult != null) {
                         p.setParameterName(nameResult);
                     } else {
-                        session.saveOrUpdate(parameterName);
+                        session.persist(parameterName);
                     }
                 }
                 session.persist(m);
@@ -75,6 +93,11 @@ public class MqttListener implements MqttCallback {
 
     }
 
+    /**
+     * Logs completion of MQTT message delivery for outbound messages.
+     *
+     * @param iMqttDeliveryToken delivery token supplied by the MQTT client
+     */
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
         log.info("Delivery complete");
     }

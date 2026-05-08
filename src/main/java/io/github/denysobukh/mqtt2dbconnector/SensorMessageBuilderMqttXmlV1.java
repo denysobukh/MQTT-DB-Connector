@@ -23,11 +23,26 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
+ * Parses version 1 XML payloads produced by the MQTT weather sensor.
+ * <p>
+ * Supported payloads contain a {@code message} root element with a timestamp in
+ * {@code yyyy-MM-dd HH:mm:ss Z} format and optional {@code temperature},
+ * {@code humidity}, {@code pressure}, and {@code voltage} child elements.
+ * Parameter values outside the configured validator ranges are ignored.
+ *
  * @author Denis Obukhov  / created on 13 Dec 2020
  */
 public class SensorMessageBuilderMqttXmlV1 implements SensorMessageBuilder {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 
+    /**
+     * Parses an XML MQTT payload into a set containing one sensor message.
+     *
+     * @param input XML payload received from MQTT
+     * @return a set with the parsed sensor message, or an empty set when no
+     * {@code message} element is present
+     * @throws BuilderException when XML parsing or timestamp parsing fails
+     */
     @Override
     public Set<SensorMessage> parse(String input) throws BuilderException {
         Set<SensorMessage> messages = new HashSet<>();
